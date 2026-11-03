@@ -27,6 +27,8 @@ return [
     'click_retention_days' => (int) env('CLICK_RETENTION_DAYS', 90),
 
     'stats' => [
+        // How often stats:rollup rebuilds the aggregates (see routes/console.php).
+        'rollup_interval_minutes' => 5,
         'default_days' => 30,
         'max_days' => 90,
         'top_referrers' => 10,
