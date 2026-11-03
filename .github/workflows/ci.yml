@@ -80,6 +80,10 @@ jobs:
 
       - run: composer install --no-interaction --no-progress --prefer-dist
 
+      # Same as the local setup. Without a .env file every test reports a warning
+      # from phpdotenv; the job's env (DB_HOST and friends) still takes precedence.
+      - run: cp .env.example .env
+
       - name: Pest with coverage
         run: vendor/bin/pest --ci --coverage --min=90
 
