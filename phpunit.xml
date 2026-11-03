@@ -19,18 +19,19 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:ZmFrZS10ZXN0LWtleS0zMi1ieXRlcy1sb25nLi4uLi4="/>
+        <env name="APP_URL" value="http://localhost"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="DB_URL" value=""/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="LOG_CHANNEL" value="null"/>
+        <!-- Tests run against MySQL, the same engine as production. DB_HOST comes from .env or CI. -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="testing"/>
+        <env name="DB_URL" value=""/>
+        <env name="API_TOKEN" value="test-token"/>
+        <env name="SHORT_URL_BASE" value="https://go.example.com"/>
+        <env name="METRICS_ENABLED" value="false"/>
     </php>
 </phpunit>
