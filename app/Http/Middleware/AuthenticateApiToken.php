@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,8 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Single-tenant bearer token for the management API. Fails closed: when no
  * token is configured, every request is rejected.
+ *
+ * Implementing AuthenticatesRequests puts this middleware before route model
+ * binding in Laravel's priority list. Otherwise an unknown code answers 404
+ * before authentication runs, and anyone could probe which codes exist.
  */
-class AuthenticateApiToken
+class AuthenticateApiToken implements AuthenticatesRequests
 {
     /**
      * @param  Closure(Request): Response  $next

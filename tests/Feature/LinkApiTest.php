@@ -21,6 +21,10 @@ describe('authentication', function () {
             ->assertUnauthorized();
     });
 
+    it('authenticates before resolving the link, so codes cannot be probed', function () {
+        $this->getJson('/api/links/does-not-exist')->assertUnauthorized();
+    });
+
     it('fails closed when no token is configured', function () {
         config(['shortlinks.api_token' => null]);
 
