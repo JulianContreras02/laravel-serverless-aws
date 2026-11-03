@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\RouteKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -37,6 +38,14 @@ class Link extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * @return HasMany<Click, $this>
+     */
+    public function clicks(): HasMany
+    {
+        return $this->hasMany(Click::class);
     }
 
     public function isDisabled(): bool
