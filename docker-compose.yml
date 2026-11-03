@@ -1,0 +1,41 @@
+name: shortlinks
+
+services:
+    # Bref's dev image: the same PHP build and extensions as the Lambda layer,
+    # plus a local API Gateway emulator that forwards HTTP requests to PHP-FPM
+    # through the Lambda Runtime Interface Emulator.
+    app:
+        image: bref/php-84-dev:3
+        ports:
+            - '8000:8000'
+        volumes:
+            - .:/var/task
+            # vendor/ lives in a named volume: much faster than a bind mount on
+            # Docker Desktop (Windows/macOS) and it keeps the host tree clean.
+            - vendor:/var/task/vendor
+        environment:
+            HANDLER: public/index.php
+            BREF_RUNTIME: fpm
+        depends_on:
+            mysql:
+                condition: service_healthy
+
+    mysql:
+        image: mysql:8.4
+        environment:
+            MYSQL_DATABASE: shortlinks
+            MYSQL_USER: shortlinks
+            MYSQL_PASSWORD: shortlinks
+            MYSQL_ROOT_PASSWORD: root
+        volumes:
+            - mysql-data:/var/lib/mysql
+            - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-proot', '--silent']
+            interval: 5s
+            timeout: 3s
+            retries: 30
+
+volumes:
+    vendor:
+    mysql-data:
