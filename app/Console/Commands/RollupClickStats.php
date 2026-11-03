@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Services\ClickRollup;
+use App\Support\Metrics\Metrics;
+use App\Support\Metrics\Unit;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
@@ -15,7 +17,7 @@ class RollupClickStats extends Command
 
     protected $description = 'Rebuild daily click aggregates from raw clicks (idempotent)';
 
-    public function handle(ClickRollup $rollup): int
+    public function handle(ClickRollup $rollup, Metrics $metrics): int
     {
         $days = filter_var($this->option('days'), FILTER_VALIDATE_INT);
         $maxDays = Config::integer('shortlinks.click_retention_days');
@@ -35,6 +37,8 @@ class RollupClickStats extends Command
 
         $durationMs = round((hrtime(true) - $startedAt) / 1_000_000, 1);
         Log::info('Click rollup completed', ['days' => $days, 'groups' => $groups, 'duration_ms' => $durationMs]);
+        // Trending this duration shows when the rollup needs an incremental watermark.
+        $metrics->put('RollupDuration', $durationMs, Unit::Milliseconds, ['groups' => $groups]);
         $this->info("Rebuilt {$groups} aggregate rows for the last {$days} day(s) in {$durationMs} ms.");
 
         return self::SUCCESS;
