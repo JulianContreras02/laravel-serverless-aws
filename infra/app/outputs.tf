@@ -16,6 +16,10 @@ output "database_endpoint" {
   value = aws_db_instance.main.address
 }
 
+output "dashboard_url" {
+  value = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards/dashboard/${aws_cloudwatch_dashboard.main.dashboard_name}"
+}
+
 output "api_token" {
   description = "Bearer token of the management API: terraform output -raw api_token"
   value       = random_password.api_token.result
