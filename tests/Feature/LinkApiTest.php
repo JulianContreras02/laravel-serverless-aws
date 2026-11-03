@@ -110,6 +110,14 @@ describe('creating links', function () {
             ->assertCreated()
             ->assertJsonPath('data.code', 'BBBBBBB');
     });
+
+    it('gives up after a bounded number of collisions', function () {
+        Link::factory()->create(['code' => 'AAAAAAA']);
+        $this->mock(ShortCodeGenerator::class)->shouldReceive('generate')->times(5)->andReturn('AAAAAAA');
+
+        $this->withoutExceptionHandling();
+        $this->postJson('/api/links', ['url' => 'https://example.org'], authHeaders());
+    })->throws(RuntimeException::class, 'Could not generate a unique short code after 5 attempts.');
 });
 
 describe('reading and disabling links', function () {
