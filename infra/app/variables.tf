@@ -126,6 +126,8 @@ variable "alarm_email" {
   description = "Optional e-mail subscribed to the alarm topic (the address must confirm the subscription)."
   type        = string
   default     = ""
+  # Keeps the address out of plan output, which is public in a public repository's Actions logs.
+  sensitive = true
 }
 
 variable "vpc_cidr" {

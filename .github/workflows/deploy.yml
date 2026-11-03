@@ -1,0 +1,107 @@
+# Manual deployment to AWS with GitHub OIDC: no AWS access keys are stored.
+# Setup (bootstrap stack, GitHub environment and variables): docs/deployment.md
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Apply the plan (leave unchecked for a plan-only dry run)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write # lets the job request an OIDC token for AWS STS
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Plan and apply
+    runs-on: ubuntu-24.04
+    # The deploy role only trusts jobs running in this environment.
+    # Protect it with required reviewers to gate every apply.
+    environment: production
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      LAMBDA_ARCHITECTURE: arm64
+      TF_IN_AUTOMATION: 'true'
+      TF_INPUT: 'false'
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_alarm_email: ${{ secrets.ALARM_EMAIL }}
+    defaults:
+      run:
+        working-directory: infra/app
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Build the Lambda package
+        working-directory: .
+        run: |
+          scripts/package-lambda.sh
+          echo "TF_VAR_bref_layer_version=$(cat build/bref-layer-version)" >> "$GITHUB_ENV"
+
+      - name: Assume the deploy role (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: deploy-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '~1.17'
+          terraform_wrapper: false
+
+      - name: Terraform init
+        run: >-
+          terraform init
+          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          -backend-config="key=shortlinks/prod.tfstate"
+          -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform plan
+        run: |
+          terraform plan -out=tfplan -no-color | tee plan.txt
+          {
+            echo "### Terraform plan"
+            echo
+            grep -E '^(Plan:|No changes)' plan.txt || echo "See the job log."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Terraform apply
+        if: ${{ inputs.apply }}
+        run: terraform apply -auto-approve tfplan
+
+      # Migrations only add tables and columns, so the new code may briefly run
+      # against the previous schema: deploying first and migrating second is safe.
+      - name: Run database migrations
+        if: ${{ inputs.apply }}
+        run: |
+          aws lambda invoke \
+            --function-name "$(terraform output -raw artisan_function_name)" \
+            --cli-binary-format raw-in-base64-out \
+            --payload '"migrate --force"' \
+            response.json > invoke.json
+          jq -r '.output // .errorMessage' response.json
+          if jq -e '.FunctionError' invoke.json > /dev/null; then
+            echo "::error::Migrations failed"
+            exit 1
+          fi
+
+      - name: Smoke test
+        if: ${{ inputs.apply }}
+        run: |
+          url="$(terraform output -raw api_url)/health"
+          curl -fsS --retry 5 --retry-delay 5 --retry-all-errors "$url"
+          echo "Deployed: $(terraform output -raw api_url)" >> "$GITHUB_STEP_SUMMARY"
