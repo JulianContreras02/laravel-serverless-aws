@@ -1,0 +1,4 @@
+# [L2] Routing lives in the web server: every path that is not a file goes to index.php.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([A-Za-z0-9]+)$ index.php?c=$1 [L,QSA]

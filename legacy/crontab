@@ -1,0 +1,2 @@
+# [L8] Scheduled work lives in the server's crontab, outside version control in most real cases.
+15 3 * * * php /var/www/shortener/cron/daily_report.php >> /var/log/shortener/cron.log 2>&1
