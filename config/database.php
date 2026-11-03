@@ -59,6 +59,9 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // One clock: PHP writes UTC and the session runs in UTC, so DATE() and NOW() agree with Carbon.
+            'timezone' => '+00:00',
+            // Set in Lambda to the RDS CA bundle: TLS with certificate verification.
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
