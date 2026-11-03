@@ -109,14 +109,14 @@ layer behind a local API Gateway emulator, so requests go through the same FPM r
 # Create a link (the local token is in .env)
 curl -X POST http://localhost:8000/api/links \
   -H "Authorization: Bearer local-dev-token" -H "Content-Type: application/json" -H "Accept: application/json" \
-  -d '{"url": "https://example.org/docs", "alias": "docs"}'
+  -d '{"url": "https://example.org/docs", "alias": "hello"}'
 
 # Follow it a few times
-curl -i http://localhost:8000/docs -H "Referer: https://news.example.net/post"
+curl -i http://localhost:8000/hello -H "Referer: https://news.example.net/post"
 
 # Aggregate now instead of waiting for the schedule, then read the stats
 docker compose exec app php artisan stats:rollup
-curl "http://localhost:8000/api/links/docs/stats?days=7" -H "Authorization: Bearer local-dev-token"
+curl "http://localhost:8000/api/links/hello/stats?days=7" -H "Authorization: Bearer local-dev-token"
 ```
 
 On Windows PowerShell, use `Copy-Item .env.example .env` and `curl.exe`.
