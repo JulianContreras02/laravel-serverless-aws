@@ -1,0 +1,22 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      composer:
+        patterns: ['*']
+
+  - package-ecosystem: terraform
+    directories:
+      - /infra/app
+      - /infra/bootstrap
+    schedule:
+      interval: monthly
