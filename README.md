@@ -6,6 +6,10 @@
 ![Terraform](https://img.shields.io/badge/IaC-Terraform-7b42bc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+![Terminal demo: docker compose up starts the Bref Lambda runtime image and MySQL, curl creates a short link with a random code, two visitors follow it and get 302 redirects, stats:rollup aggregates the clicks while printing a JSON log line and an EMF metric, and the stats endpoint reports 2 clicks by day, referrer host and device.](docs/demo/demo.gif)
+
+<sub>A real local run, recorded with [VHS](https://github.com/charmbracelet/vhs) from [`docs/demo/demo.tape`](docs/demo/demo.tape). `docs/demo/record.sh` regenerates it.</sub>
+
 A URL shortener API with click analytics, built as a reference for moving a **legacy PHP application to
 serverless on AWS**. It is small but has everything a production service needs: Laravel 13 on AWS Lambda with
 [Bref](https://bref.sh), RDS MySQL, infrastructure in Terraform, CI/CD in GitHub Actions with OIDC (no stored AWS
@@ -259,7 +263,7 @@ scripts/                  package-lambda.sh (deploy artifact), benchmark.php (lo
 infra/bootstrap/          State bucket, GitHub OIDC provider, deploy role, permissions boundary
 infra/app/                VPC, RDS, Lambda, API Gateway, Scheduler, alarms, dashboard
 legacy/                   The plain-PHP version this replaces (reference only)
-docs/                     Deployment, migration guide, benchmarks
+docs/                     Deployment, migration guide, benchmarks, demo GIF and its VHS tape
 .github/workflows/        ci.yml (every push and PR), deploy.yml (manual, OIDC)
 ```
 
