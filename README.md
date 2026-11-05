@@ -1,5 +1,7 @@
 # laravel-serverless-aws
 
+**English** · [Español](README.es.md)
+
 [![CI](https://github.com/JulianContreras02/laravel-serverless-aws/actions/workflows/ci.yml/badge.svg)](https://github.com/JulianContreras02/laravel-serverless-aws/actions/workflows/ci.yml)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777bb4)
 ![Laravel 13](https://img.shields.io/badge/Laravel-13-ff2d20)
